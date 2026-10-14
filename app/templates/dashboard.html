@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="uz">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Topshiriqlar boshqaruvi</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/admin.css">
+  <link rel="stylesheet" href="/static/admin-panels.css">
+</head>
+<body>
+  <aside class="sidebar">
+    <a class="brand" href="/" aria-label="Taskline dashboard"><span class="brand-mark">T</span><span>taskline<span class="brand-dot">.</span></span></a>
+    <div class="side-label">WORKSPACE</div>
+    <nav class="nav" aria-label="Asosiy navigatsiya">
+      <button class="nav-item active" data-view="overview"><span class="nav-icon">▦</span>Dashboard</button>
+      <button class="nav-item" data-view="tasks"><span class="nav-icon">▤</span>Topshiriqlar</button>
+      <button class="nav-item" data-view="reviews"><span class="nav-icon">◉</span>Hisobotlar <span class="nav-count" id="review-count">0</span></button>
+      <button class="nav-item" data-view="users"><span class="nav-icon">♙</span>Foydalanuvchilar</button>
+      <button class="nav-item" data-view="settings"><span class="nav-icon">⚙</span>Sozlamalar</button>
+      <button class="nav-item" data-view="admins"><span class="nav-icon">♧</span>Adminlar</button>
+    </nav>
+    <div class="side-label side-label-lower">SYSTEM</div>
+    <div class="system-note"><span class="pulse"></span><span>Verification queue<br><b>Online</b></span></div>
+    <div class="sidebar-footer">TASK OPERATIONS<br><span>ADMIN CONSOLE · 01</span></div>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <div><div class="eyebrow">TASK OPERATIONS / <span id="crumb">OVERVIEW</span></div><h1 id="page-title">Dashboard</h1></div>
+      <div class="top-actions"><span class="date-label" id="today"></span><button class="avatar" title="Admin account">{{ admin[:1]|upper }}</button></div>
+    </header>
+
+    <section class="view active" id="view-overview">
+      <div class="metric-grid" id="metrics"></div>
+      <div class="section-heading"><div><div class="eyebrow">LIVE MODERATION</div><h2>Ko‘rib chiqish navbati</h2></div><button class="text-button" data-go="reviews">Barchasini ko‘r <span>→</span></button></div>
+      <div class="table-wrap"><table><thead><tr><th>SUBMISSION</th><th>FOYDALANUVCHI</th><th>TASK</th><th>RISK</th><th>HOLAT</th><th></th></tr></thead><tbody id="overview-reviews"></tbody></table></div>
+      <div class="section-heading tasks-heading"><div><div class="eyebrow">CAMPAIGN CONTROL</div><h2>Oxirgi topshiriqlar</h2></div><button class="text-button" data-go="tasks">Topshiriqlarga o‘tish <span>→</span></button></div>
+      <div class="table-wrap"><table><thead><tr><th>TASK</th><th>KIM UCHUN</th><th>MUKOFOT</th><th>MUDDAT</th><th>HOLAT</th></tr></thead><tbody id="overview-tasks"></tbody></table></div>
+    </section>
+
+    <section class="view" id="view-tasks">
+      <div class="section-heading"><div><div class="eyebrow">CAMPAIGN CONTROL</div><h2>Barcha topshiriqlar</h2></div><button class="primary-button" id="new-task-button">＋ Yangi topshiriq</button></div>
+      <div class="table-wrap"><table><thead><tr><th>TASK</th><th>KIM UCHUN</th><th>MUKOFOT</th><th>MUDDAT</th><th>ISHTIROKCHI</th><th>HOLAT</th><th></th></tr></thead><tbody id="tasks-table"></tbody></table></div>
+      <form class="task-form hidden" id="task-form">
+        <div class="form-head"><div><div class="eyebrow">NEW CAMPAIGN</div><h2>Yangi topshiriq</h2></div><button class="icon-button" type="button" id="close-task" aria-label="Yopish">×</button></div>
+        <div class="form-grid">
+          <label class="wide">Sarlavha<input name="title" required maxlength="200" placeholder="Masalan, IT tadbiri reklamasi"></label>
+          <label class="wide">Topshiriq matni<textarea name="advertisement_text" required rows="4"></textarea></label>
+          <label class="wide">Topshiriq rasmi (ixtiyoriy)<input name="advertisement_image" type="file" accept="image/jpeg,image/png,image/webp"></label>
+          <label>Kim uchun<select name="is_public" id="task-audience"><option value="true">Barcha jamoaga</option><option value="false">Bitta a’zoga</option></select></label>
+          <label id="assigned-user-field" class="hidden">Foydalanuvchini qidiring
+            <input id="task-user-search" type="search" placeholder="Username, ism yoki Telegram ID">
+            <select name="assigned_user_telegram_id" id="task-user-select" required>
+              <option value="">Avval foydalanuvchini qidiring</option>
+            </select>
+          </label>
+          <label>Mukofot, ball<input name="reward_points" type="number" min="1" required></label>
+          <label>Boshlanish vaqti<input name="starts_at" type="datetime-local" required></label>
+          <label>Tugash vaqti<input name="ends_at" type="datetime-local" required></label>
+          <label>Maks. ishtirokchi<input name="maximum_participants" type="number" min="1"></label>
+        </div>
+        <div class="form-actions"><span class="form-message" id="form-message"></span><button type="submit" class="primary-button">Topshiriq yaratish</button></div>
+      </form>
+    </section>
+
+    <section class="view" id="view-reviews">
+      <div class="section-heading"><div><div class="eyebrow">SCREENSHOTLAR</div><h2>Hisobotlar</h2></div><select id="review-filter" class="filter-select"><option value="review">Ko‘rib chiqilmoqda</option><option value="">Barcha holatlar</option><option value="PROCESSING">Jarayonda</option><option value="APPROVED">Tasdiqlangan</option><option value="REJECTED">Rad etilgan</option></select></div>
+      <div class="review-grid" id="review-list"></div>
+    </section>
+
+    <section class="view" id="view-users">
+      <div class="section-heading"><div><div class="eyebrow">COMMUNITY</div><h2>Foydalanuvchilar</h2></div><input class="search-input" id="user-search" placeholder="Username yoki Telegram ID..." type="search"></div>
+      <div class="table-wrap"><table><thead><tr><th>FOYDALANUVCHI</th><th>TELEGRAM ID</th><th>BALANS</th><th>RO‘YXATDAN O‘TDI</th><th>HOLAT</th><th></th></tr></thead><tbody id="users-table"></tbody></table></div>
+    </section>
+    <section class="view" id="view-settings">
+      <div class="section-heading"><div><div class="eyebrow">RISK & OPERATIONS</div><h2>Tizim sozlamalari</h2></div></div>
+      <form class="settings-form" id="settings-form">
+        <label>Submission / minut<input name="submissions_per_minute" type="number" min="1" max="60" required></label>
+        <label>Submission / kun<input name="submissions_per_day" type="number" min="1" max="5000" required></label>
+        <label>Manual review confidence<input name="manual_review_confidence" type="number" min="0" max="1" step="0.01" required></label>
+        <label>Yuqori fraud siyosati<select name="high_fraud_policy"><option value="manual">Manual review</option><option value="reject">Reject</option></select></label>
+        <label>Screenshot retention (kun, 0 = saqlash)<input name="screenshot_retention_days" type="number" min="0" max="3650" required></label>
+        <div class="settings-actions"><span class="form-message" id="settings-message"></span><button class="primary-button">Saqlash</button></div>
+      </form>
+    </section>
+    <section class="view" id="view-admins">
+      <div class="section-heading"><div><div class="eyebrow">ACCESS CONTROL</div><h2>Admin hisoblari</h2></div></div>
+      <form class="inline-form" id="admin-form">
+        <label>Username<input name="username" required minlength="3" maxlength="64"></label>
+        <label>Parol<input name="password" type="password" required minlength="12" maxlength="256" autocomplete="new-password"></label>
+        <button class="primary-button">Admin qo‘shish</button>
+      </form>
+      <div class="table-wrap"><table><thead><tr><th>USERNAME</th><th>YARATILDI</th><th>OXIRGI LOGIN</th><th>HOLAT</th><th></th></tr></thead><tbody id="admins-table"></tbody></table></div>
+    </section>
+    <footer class="main-footer"><span>Taskline admin console</span><span>SECURE OPERATIONS · <span class="mono">v1.0</span></span></footer>
+  </main>
+  <script src="/static/admin.js" defer></script>
+</body>
+</html>
